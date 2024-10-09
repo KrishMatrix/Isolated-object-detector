@@ -8,34 +8,26 @@ def find_isolated_particles_2d(image):
   # Convert to grayscale and threshold
   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
   _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
-
-  # Find contours
+ #  contours
   contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-  # Extract particle centers
+ # Extract particle centers
   centers = []
   for contour in contours:
       M = cv2.moments(contour)
       if M["m00"] != 0:
           cX = int(M["m10"] / M["m00"])
           cY = int(M["m01"] / M["m00"])
-          centers.append((cX, cY))
-
-  # Use DBSCAN to find isolated particles
+          centers.append((cX, cY))# find isolated particles
   db = DBSCAN(eps=20, min_samples=1).fit(centers)
   labels = db.labels_
-
-  # Count the number of particles in each cluster
+# Count the number of particles in each cluster
   unique_labels, counts = np.unique(labels, return_counts=True)
   isolated_particles = [centers[i] for i, count in enumerate(counts) if count == 1]
 
-  return isolated_particles
-
-# Example usage with a generated image
+  return isolated_particles#  generated image
 test_image = np.ones((512, 512, 3), dtype=np.uint8) * 255
 generate_particles(test_image, 20)
 isolated_particles = find_isolated_particles_2d(test_image)
-
 # Visualize isolated particles
 for (x, y) in isolated_particles:
   cv2.circle(test_image, (x, y), 10, (0, 255, 0), 2)
